@@ -1,9 +1,10 @@
 package com.nykytenko
 
-import pureconfig.error.ConfigReaderFailures
+import cats.effect.Effect
+import cats.implicits._
+import pureconfig.error.ConfigReaderException
 
 package object config {
-
 
   case class SparkConfig(name: String, master: String)
 
@@ -15,6 +16,10 @@ package object config {
 
   import pureconfig._
 
-  def load: Either[ConfigReaderFailures, AppConfig] = loadConfig[AppConfig]
-
+  def load[F[_]](implicit E: Effect[F]): F[AppConfig] = E.delay {
+      loadConfig[AppConfig]
+    }.flatMap {
+      case Right(config) => E.pure(config)
+      case Left(e)       => E.raiseError(new ConfigReaderException[AppConfig](e))
+    }
 }

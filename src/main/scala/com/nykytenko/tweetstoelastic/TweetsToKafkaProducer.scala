@@ -40,11 +40,19 @@ object TweetsToKafkaProducer {
     kafkaProducer.close()
 
     def kafkaProducer: KafkaProducer[String, String] = {
-      val kafkaTopic = "tweets"
       val properties = new Properties()
       properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG      , bootstrapServers)
       properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG   , classOf[StringSerializer].getName)
       properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG , classOf[StringSerializer].getName)
+
+      properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG     , "true")
+      properties.put(ProducerConfig.ACKS_CONFIG                   , "all")
+      properties.put(ProducerConfig.RETRIES_CONFIG                , Integer.MAX_VALUE.toString)
+      properties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5")
+
+      properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG       , "snappy")
+      properties.put(ProducerConfig.LINGER_MS_CONFIG              , (32*1024).toString)
+      properties.put(ProducerConfig.BATCH_SIZE_CONFIG             , "true")
       properties.put("request.required.acks", "1")
       new KafkaProducer[String, String](properties)
 

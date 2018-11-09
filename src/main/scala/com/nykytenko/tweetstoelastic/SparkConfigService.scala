@@ -3,10 +3,9 @@ package com.nykytenko.tweetstoelastic
 import cats.effect.Effect
 import com.nykytenko.config.SparkConfig
 import org.apache.spark.SparkConf
-import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-case class SparkConfigService() {
+case class SparkConfigService[F[_]]()(implicit E: Effect[F]) {
   def load(conf: SparkConfig): StreamingContext = {
     val sparkConf = new SparkConf()
       .setAppName(conf.name)
